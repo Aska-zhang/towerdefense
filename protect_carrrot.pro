@@ -33,7 +33,8 @@ SOURCES += \
     monster.cpp \
     tower.cpp \
     mypushbutton2.cpp \
-    bullet.cpp
+    bullet.cpp \
+    moveway.cpp
 
 HEADERS += \
         mainscene.h \
@@ -43,7 +44,9 @@ HEADERS += \
     monster.h \
     tower.h \
     mypushbutton2.h \
-    bullet.h
+    bullet.h \
+    moveway.h \
+    collisioncheck.h
 
 FORMS += \
         mainscene.ui

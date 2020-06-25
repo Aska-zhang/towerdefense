@@ -41,6 +41,56 @@ chooselevel::chooselevel(QWidget *parent) : QMainWindow(parent)
                       ,QPoint(this->width()*0.84,this->height()*0.17),QPoint(this->width()*0.856,this->height()*0.68),QPoint(this->width()*0.851,this->height()*0.2)
                       ,QPoint(this->width()*0.77,this->height()*0.19),QPoint(this->width()*0.91,this->height()*0.69),QPoint(this->width()*0.91,this->height()*0.69)};
 
+    int turn[12]={8,6,2,10,6,9,7,9,9,8,4,9};
+    QPoint Q[12][10]={{QPoint(150,237.5),QPoint(150, 537.5),QPoint(462.5, 537.5)
+                     ,QPoint(462.5, 425),QPoint(762.5, 425),QPoint(762.5, 537.5)
+                     ,QPoint(1058.5, 537.5),QPoint(1058.5, 237.5),QPoint(0,0),QPoint(0,0)},
+                    {QPoint(462.5, 237.5),QPoint(950, 237.5),QPoint(950, 440),
+                    QPoint(250, 440),QPoint(250, 650),QPoint(737.5, 650),
+                    QPoint(0,0),QPoint(0,0),QPoint(0,0),QPoint(0,0)},
+                    {QPoint(75, 225),QPoint(1122.5, 225),QPoint(0,0),QPoint(0,0),
+                    QPoint(0,0),QPoint(0,0),QPoint(0,0),QPoint(0,0),
+                    QPoint(0,0),QPoint(0,0)},
+                    {QPoint(250, 237.5),QPoint(250, 543.75),QPoint(550, 543.75),QPoint(550, 237.5),
+                    QPoint(856.25, 237.5),QPoint(856.25,431.25),QPoint(762.5, 431.25),QPoint(762.5, 643.75),
+                    QPoint(1055, 643.75),QPoint(1055, 237.5)},
+                    {QPoint(50, 237.5),QPoint(956.25, 237.5),QPoint(956.25, 450),
+                    QPoint(250, 450),QPoint(250, 662.5),QPoint(950,662.5),QPoint(0,0),
+                    QPoint(0,0),QPoint(0,0),QPoint(0,0)},
+                    {QPoint(143.75, 237.5),QPoint(143.75, 656.25),QPoint(462.5, 656.25),
+                    QPoint(462.5, 460),QPoint(856.25, 460),QPoint(856.25,656.25),
+                    QPoint(1062.5, 656.25),QPoint(1062.5, 237.5),QPoint(473, 237.5),QPoint(0,0)},
+                    {QPoint(250, 656.25),QPoint(250, 262.5),QPoint(550, 262.5),
+                    QPoint(550, 656.25),QPoint(856.25, 656.25),QPoint(856.25,262.5),
+                    QPoint(1031.25, 262.5),QPoint(0,0),QPoint(0,0),QPoint(0,0)},
+                    {QPoint(275, 475),QPoint(650, 475),QPoint(650, 262.5),QPoint(756.25, 262.5),
+                    QPoint(756.25, 681.25),QPoint(950,681.25),QPoint(950, 262.5),
+                    QPoint(1062.5, 262.5),QPoint(1062.5, 650),QPoint(0,0)},
+                    {QPoint(87.5, 362.5),QPoint(250, 362.5),QPoint(250, 681.35),
+                    QPoint(456.25, 681.25),QPoint(456.25, 470),QPoint(756.25,470),
+                    QPoint(756.25, 681.25),QPoint(1058, 681.25),QPoint(1058, 275),QPoint(0,0)},
+                    {QPoint(287.5, 681.25),QPoint(962.5, 681.25),QPoint(962.5, 575),
+                    QPoint(456.25, 575),QPoint(456.25, 362.5),QPoint(250,362.5),
+                    QPoint(250, 265),QPoint(962.5, 265),QPoint(0,0),QPoint(0,0)},
+                    {QPoint(137.5, 260),QPoint(550, 260),QPoint(550, 681.25),QPoint(550, 681.25),
+                    QPoint(0,0),QPoint(0,0),QPoint(0,0),QPoint(0,0),QPoint(0,0),QPoint(0,0)},
+                    {QPoint(150, 625),QPoint(150, 260),QPoint(456.25, 260),QPoint(456.25, 468.75),
+                    QPoint(756.25, 468.75),QPoint(756.25,260),QPoint(962.5, 260),QPoint(958, 681.25),
+                    QPoint(1083, 681.25),QPoint(0,0)}};
+    QPoint **q=new QPoint* [12];
+    int i=0,j=0;
+    for(i=0;i<12;i++)
+    {
+        q[i]=new QPoint[turn[i]];
+    }
+    for(i=0;i<12;i++)
+    {
+        for(j=0;j<turn[i];j++)
+        {
+            q[i][j]=Q[i][j];
+        }
+    }
+
     //创建选择关卡的按钮
     for( int i = 0 ; i < 12 ;i ++)
     {
@@ -55,7 +105,7 @@ chooselevel::chooselevel(QWidget *parent) : QMainWindow(parent)
 
             //进入到游戏场景
             this->hide(); //将选关场景隐藏掉
-            play = new playscene(i+1,background[i],playway[i]); //创建游戏场景
+            play = new playscene(i+1,turn[i],q[i],background[i],playway[i]); //创建游戏场景
             play->show();//显示游戏场景
 
             connect(play,&playscene::choosesceneback,[=](){

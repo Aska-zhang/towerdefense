@@ -12,9 +12,13 @@
 //{
 
 //}
-
-playscene::playscene(int levelNum, QString picpath,QString waypath,QWidget *parent):picturepath(picpath),wpath(waypath), QMainWindow(parent)
+QPoint Q1[8]={QPoint(150,237.5),QPoint(150, 537.5),QPoint(462.5, 537.5)
+             ,QPoint(462.5, 425),QPoint(762.5, 425),QPoint(762.5, 537.5)
+             ,QPoint(1058.5, 537.5),QPoint(1058.5, 237.5)};
+playscene::playscene(int levelNum,int turns,QPoint *Qturn, QString picpath,QString waypath,QWidget *parent):picturepath(picpath),wpath(waypath), QMainWindow(parent)
 {
+    num_of_turn=turns;
+    turn=Qturn;
 
     this->levelIndex = levelNum;
     ifdrawkk=false;
@@ -33,6 +37,7 @@ playscene::playscene(int levelNum, QString picpath,QString waypath,QWidget *pare
         {
             int x=i*100;int y=j*100;
             pos[i][j]=QPoint(x,y);
+            canputtower[i][j]=true;
         }
     }
 
@@ -50,6 +55,7 @@ playscene::playscene(int levelNum, QString picpath,QString waypath,QWidget *pare
 
     });
 
+    addwaypoints();
 //    connect(stb1,&QPushButton::click,[=](){
 //       tower *t=new tower(realpos);
 //       towersList.push_back(t);
@@ -58,6 +64,59 @@ playscene::playscene(int levelNum, QString picpath,QString waypath,QWidget *pare
 //       delete stb1;delete  stb2;delete stb3;
 //    });
 
+}
+
+void playscene::addwaypoints()//添加地图上的拐点,根据关卡找turn指针的第i个，从而获得具体的转折点的位置
+{
+//    moveway *wayPoint1 = new moveway(QPoint(150, 625));
+//    waypointslist.push_back(wayPoint1);
+
+//    moveway *wayPoint2 = new moveway(QPoint(150, 260));
+//    waypointslist.push_back(wayPoint2);
+//    wayPoint2->setNextWayPoint(wayPoint1);
+
+//    moveway *wayPoint3 = new moveway(QPoint(456.25, 260));
+//    waypointslist.push_back(wayPoint3);
+//    wayPoint3->setNextWayPoint(wayPoint2);
+
+//    moveway *wayPoint4 = new moveway(QPoint(456.25, 468.75));
+//    waypointslist.push_back(wayPoint4);
+//    wayPoint4->setNextWayPoint(wayPoint3);
+
+//    moveway *wayPoint5 = new moveway(QPoint(756.25, 468.75));
+//    waypointslist.push_back(wayPoint5);
+//    wayPoint5->setNextWayPoint(wayPoint4);
+
+//    moveway *wayPoint6 = new moveway(QPoint(756.25,260));
+//    waypointslist.push_back(wayPoint6);
+//    wayPoint6->setNextWayPoint(wayPoint5);
+
+//    moveway *wayPoint7 = new moveway(QPoint(962.5, 260));
+//    waypointslist.push_back(wayPoint7);
+//    wayPoint7->setNextWayPoint(wayPoint6);
+
+//    moveway *wayPoint8 = new moveway(QPoint(958, 681.25));
+//    waypointslist.push_back(wayPoint8);
+//    wayPoint8->setNextWayPoint(wayPoint7);
+
+//    moveway *wayPoint9 = new moveway(QPoint(1083, 681.25));
+//    waypointslist.push_back(wayPoint9);
+//    wayPoint9->setNextWayPoint(wayPoint8);
+
+//    moveway *wayPoint10 = new moveway(QPoint(445, 237.5));
+//    waypointslist.push_back(wayPoint10);
+//    wayPoint10->setNextWayPoint(wayPoint9);
+
+    moveway **wayPoint=new moveway*[num_of_turn];//=new moveway[num_of_turn];
+    for(int i=0;i<num_of_turn;i++)
+    {
+        wayPoint[i]=new moveway(turn[i]);
+        waypointslist.push_back(wayPoint[i]);
+        if(i>0)
+        {
+            wayPoint[i]->setNextWayPoint(wayPoint[i-1]);
+        }
+    }
 }
 
 void playscene::paintEvent(QPaintEvent *)
@@ -76,7 +135,7 @@ void playscene::paintEvent(QPaintEvent *)
     //画萝卜
     pix.load(":/res/carrot/pic15.png");
     pix=pix.scaled(pix.width()*1.3,pix.height()*1.3);
-    painter .drawPixmap(this->width()*0.91,this->height()*0.69,pix);
+    painter .drawPixmap(this->width()*0.77,this->height()*0.19,pix);
 
     if(ifdrawkk==true)
     {
@@ -85,7 +144,8 @@ void playscene::paintEvent(QPaintEvent *)
 
     foreach (const tower *t, towersList)
         t->draw(&painter);
-
+    foreach (const moveway *wayPoint, waypointslist)
+        wayPoint->draw(&painter);
 
 
 }
@@ -96,8 +156,11 @@ void playscene::mousePressEvent(QMouseEvent *e)
     QPoint realpos=QPoint(floor(pressPos.x()/100)*100,floor(pressPos.y()/100)*100);
     if(e->button()==Qt::LeftButton)
     {
+        int x1=floor(pressPos.x()/100);int y1=floor(pressPos.y()/100);
+        if(canputtower[x1][y1])
+        {
 
-        ifdrawkk=true;
+        ifdrawkk=true;//框框，就是选择放哪个炮塔时候的那个
         drawkkpos=realpos;
         mypushbutton2 *stb1=new mypushbutton2(":/res/TBottle/pic12.png",":/res/TBottle/pic13.png");
         stb1->setParent(this);
@@ -121,8 +184,29 @@ void playscene::mousePressEvent(QMouseEvent *e)
            towersList.push_back(t);
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
-           delete stb1;delete  stb2;delete stb3;
+           delete stb1;delete  stb2;delete stb3;delete stbcancel;
            ifdrawkk=false;
+           canputtower[x1][y1]=false;
+           update();
+        });
+        connect(stb2,&QPushButton::clicked,[=](){
+           tower *t=new tower(realpos,this);
+           towersList.push_back(t);
+           //qDebug()<<"jianta";
+           //stb1->hide();stb2->hide();stb3->hide();
+           delete stb1;delete  stb2;delete stb3;delete stbcancel;
+           ifdrawkk=false;
+           canputtower[x1][y1]=false;
+           update();
+        });
+        connect(stb3,&QPushButton::clicked,[=](){
+           tower *t=new tower(realpos,this);
+           towersList.push_back(t);
+           //qDebug()<<"jianta";
+           //stb1->hide();stb2->hide();stb3->hide();
+           delete stb1;delete  stb2;delete stb3;delete stbcancel;
+           ifdrawkk=false;
+           canputtower[x1][y1]=false;
            update();
         });
         connect(stbcancel,&QPushButton::clicked,[=](){
@@ -130,6 +214,7 @@ void playscene::mousePressEvent(QMouseEvent *e)
             ifdrawkk=false;
             update();
         });
+        }
 
 
     }
