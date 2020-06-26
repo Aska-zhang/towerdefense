@@ -5,20 +5,25 @@
 #include"mypushbutton2.h"
 #include<QTimer>
 #include<QMouseEvent>
+#include <QtGlobal>
+#include <QMessageBox>
 #include<math.h>
 #include"tower.h"
 #include"bullet.h"
+#include"monster.h"
 //playscene::playscene(QWidget *parent) : QMainWindow(parent)
 //{
 
 //}
-QPoint Q1[8]={QPoint(150,237.5),QPoint(150, 537.5),QPoint(462.5, 537.5)
-             ,QPoint(462.5, 425),QPoint(762.5, 425),QPoint(762.5, 537.5)
-             ,QPoint(1058.5, 537.5),QPoint(1058.5, 237.5)};
-playscene::playscene(int levelNum,int turns,QPoint *Qturn, QString picpath,QString waypath,QWidget *parent):picturepath(picpath),wpath(waypath), QMainWindow(parent)
+static const int TowerCost = 100;
+playscene::playscene(int levelNum,int turns,QPoint carrotp,QPoint en,QPoint *Qturn, QString picpath,QString waypath,QWidget *parent):picturepath(picpath),wpath(waypath), QMainWindow(parent)
 {
     num_of_turn=turns;
     turn=Qturn;
+    carrot=carrotp;
+    entry=en;
+    Hp=10;
+    playrGold=1000;gameEnded=false;gameWin=false;
 
     this->levelIndex = levelNum;
     ifdrawkk=false;
@@ -47,7 +52,7 @@ playscene::playscene(int levelNum,int turns,QPoint *Qturn, QString picpath,QStri
 
     //点击返回
     connect(backBtn,&mypushbutton::clicked,[=](){
-        qDebug() << "翻金币场景中：点击了返回按钮";
+//        qDebug() << "翻金币场景中：点击了返回按钮";
 
         QTimer::singleShot(500,this,[=](){
             emit this->choosesceneback();
@@ -56,13 +61,13 @@ playscene::playscene(int levelNum,int turns,QPoint *Qturn, QString picpath,QStri
     });
 
     addwaypoints();
-//    connect(stb1,&QPushButton::click,[=](){
-//       tower *t=new tower(realpos);
-//       towersList.push_back(t);
-//       qDebug()<<"jianta";
-//       stb1->hide();stb2->hide();stb3->hide();
-//       delete stb1;delete  stb2;delete stb3;
-//    });
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateMap()));
+    timer->start(20);
+//300ms后开始游戏
+    QTimer::singleShot(300, this, SLOT(gameStart()));
+
 
 }
 
@@ -75,52 +80,159 @@ void playscene::addwaypoints()//添加地图上的拐点,根据关卡找turn指�
 //    waypointslist.push_back(wayPoint2);
 //    wayPoint2->setNextWayPoint(wayPoint1);
 
-//    moveway *wayPoint3 = new moveway(QPoint(456.25, 260));
-//    waypointslist.push_back(wayPoint3);
-//    wayPoint3->setNextWayPoint(wayPoint2);
-
-//    moveway *wayPoint4 = new moveway(QPoint(456.25, 468.75));
-//    waypointslist.push_back(wayPoint4);
-//    wayPoint4->setNextWayPoint(wayPoint3);
-
-//    moveway *wayPoint5 = new moveway(QPoint(756.25, 468.75));
-//    waypointslist.push_back(wayPoint5);
-//    wayPoint5->setNextWayPoint(wayPoint4);
-
-//    moveway *wayPoint6 = new moveway(QPoint(756.25,260));
-//    waypointslist.push_back(wayPoint6);
-//    wayPoint6->setNextWayPoint(wayPoint5);
-
-//    moveway *wayPoint7 = new moveway(QPoint(962.5, 260));
-//    waypointslist.push_back(wayPoint7);
-//    wayPoint7->setNextWayPoint(wayPoint6);
-
-//    moveway *wayPoint8 = new moveway(QPoint(958, 681.25));
-//    waypointslist.push_back(wayPoint8);
-//    wayPoint8->setNextWayPoint(wayPoint7);
-
-//    moveway *wayPoint9 = new moveway(QPoint(1083, 681.25));
-//    waypointslist.push_back(wayPoint9);
-//    wayPoint9->setNextWayPoint(wayPoint8);
-
-//    moveway *wayPoint10 = new moveway(QPoint(445, 237.5));
-//    waypointslist.push_back(wayPoint10);
-//    wayPoint10->setNextWayPoint(wayPoint9);
-
     moveway **wayPoint=new moveway*[num_of_turn];//=new moveway[num_of_turn];
-    for(int i=0;i<num_of_turn;i++)
+    for(int i=num_of_turn-1;i>=0;i--)
     {
         wayPoint[i]=new moveway(turn[i]);
         waypointslist.push_back(wayPoint[i]);
-        if(i>0)
+        if(i<num_of_turn-1)
         {
-            wayPoint[i]->setNextWayPoint(wayPoint[i-1]);
+            wayPoint[i]->setNextWayPoint(wayPoint[i+1]);
         }
     }
 }
 
+void playscene::getHpDamage(int damage)
+{
+//	m_audioPlayer->playSound(LifeLoseSound);
+    Hp -= damage;
+    if (Hp <= 0)
+        doGameOver();
+}
+
+void playscene::removedEnemy(monster *enemy)
+{
+    Q_ASSERT(enemy);
+
+    enemylist.removeOne(enemy);
+    delete enemy;
+
+    if (enemylist.empty())
+    {
+        ++wave;
+        if (!loadWave())
+        {
+            gameWin = true;
+            // 游戏胜利转到游戏胜利场景
+            // 这里暂时以打印处理
+        }
+    }
+}
+void playscene::removedBullet(bullet *bullets)
+{
+    Q_ASSERT(bullets);
+
+    bulletlist.removeOne(bullets);
+    delete bullets;
+}
+
+void  playscene::updateMap()
+{
+    foreach (monster *enemy, enemylist)
+        enemy->move();
+    foreach (tower *t, towersList)
+        t->checkEnemyInRange();
+//    foreach (bullet *b, bulletlist)
+//        b->move();
+    update();
+}
+
+void playscene::addBullet(bullet *bullets)
+{
+    Q_ASSERT(bullets);
+
+    bulletlist.push_back(bullets);
+}
+
+bool playscene::canBuyTower() const
+{
+    if (playrGold >= TowerCost)
+        return true;
+    return false;
+}
+
+void playscene::drawWave(QPainter *painter)
+{
+    painter->setPen(QPen(Qt::red));
+    painter->drawText(QRect(400, 5, 100, 25), QString("WAVE : %1").arg(wave + 1));
+}
+
+void playscene::drawHP(QPainter *painter)
+{
+    painter->setPen(QPen(Qt::red));
+    painter->drawText(QRect(30, 5, 100, 25), QString("HP : %1").arg(Hp));
+}
+
+void playscene::drawPlayerGold(QPainter *painter)
+{
+    painter->setPen(QPen(Qt::red));
+    painter->drawText(QRect(200, 5, 200, 25), QString("GOLD : %1").arg(playrGold));
+}
+
+void playscene::doGameOver()
+{
+    if (!gameEnded)
+    {
+        gameEnded = true;
+        // 此处应该切换场景到结束场景
+        // 暂时以打印替代,见paintEvent处理
+    }
+}
+
+void playscene::awardGold(int gold)
+{
+    playrGold += gold;
+    update();
+}
+void playscene::minusgold(int gold)
+{
+    playrGold -= gold;
+    update();
+}
+
+bool playscene::loadWave()
+{
+//	if (wave >= wavesInfo.size())
+//		return false;
+
+//	moveway *startWayPoint = waypointslist.back();
+//	QList<QVariant> curWavesInfo = wavesInfo[wave].toList();
+
+//	for (int i = 0; i < curWavesInfo.size(); ++i)
+//	{
+//		QMap<QString, QVariant> dict = curWavesInfo[i].toMap();
+//		int spawnTime = dict.value("spawnTime").toInt();
+
+        QString q=":/res/Monster1/pic1.png";
+//		monster *enemy = new monster(startWayPoint, this,q);
+//		enemylist.push_back(enemy);
+//		QTimer::singleShot(spawnTime, enemy, SLOT(doActivate()));
+//	}
+
+//	return true;
+    if (wave >= 6)
+            return false;
+       moveway *startWayPoint = waypointslist.back(); // 这里是个逆序的，尾部才是其实节点
+        int enemyStartInterval[] = { 100, 2100, 4100, 6100, 8100, 10100 };
+        for (int i = 0; i < 6; ++i)
+        {
+            monster *enemy = new monster(startWayPoint, this,q);
+            enemylist.push_back(enemy);
+            QTimer::singleShot(enemyStartInterval[i],enemy, SLOT(becomealive()));
+        }
+        return true;
+}
+
 void playscene::paintEvent(QPaintEvent *)
 {
+    if (gameEnded || gameWin)
+    {
+        QString text = gameEnded ? "YOU LOST!!!" : "YOU WIN!!!";
+        QPainter painter(this);
+        painter.setPen(QPen(Qt::red));
+        painter.drawText(rect(), Qt::AlignCenter, text);
+        return;
+    }
     QPainter painter(this);
     QPixmap pix;
     pix.load(picturepath);
@@ -132,10 +244,37 @@ void playscene::paintEvent(QPaintEvent *)
     pix.load(wpath);
     pix=pix.scaled(pix.width()*1.25,pix.height()*1.3);
     painter .drawPixmap(0,170,pix);
+    //画出怪地
+    pix.load(":/res/Object1-1/pic8.png");
+    pix=pix.scaled(100,100);
+    painter .drawPixmap(entry.x()-50,entry.y()-50,pix.width(),pix.height(),pix);
+
+
     //画萝卜
-    pix.load(":/res/carrot/pic15.png");
-    pix=pix.scaled(pix.width()*1.3,pix.height()*1.3);
-    painter .drawPixmap(this->width()*0.77,this->height()*0.19,pix);
+    if(Hp==10)
+    {
+        pix.load(":/res/carrot/pic15.png");
+        pix=pix.scaled(pix.width()*1.3,pix.height()*1.3);
+        painter .drawPixmap(carrot,pix);
+    }
+    else if(Hp<10&&Hp>7)
+    {
+        pix.load(":/res/carrot/pic10.png");
+        pix=pix.scaled(pix.width()*1.3,pix.height()*1.3);
+        painter .drawPixmap(carrot,pix);
+    }
+    else if(Hp<=7&&Hp>=4)
+    {
+        pix.load(":/res/carrot/pic12.png");
+        pix=pix.scaled(pix.width()*1.3,pix.height()*1.3);
+        painter .drawPixmap(carrot,pix);
+    }
+    else
+    {
+        pix.load(":/res/carrot/pic23.png");
+        pix=pix.scaled(pix.width()*1.3,pix.height()*1.3);
+        painter .drawPixmap(carrot,pix);
+    }
 
     if(ifdrawkk==true)
     {
@@ -146,7 +285,13 @@ void playscene::paintEvent(QPaintEvent *)
         t->draw(&painter);
     foreach (const moveway *wayPoint, waypointslist)
         wayPoint->draw(&painter);
-
+    foreach (const monster *enemy, enemylist)
+        enemy->draw(&painter);
+    foreach (const bullet *bullets, bulletlist)
+        bullets->draw(&painter);
+    drawWave(&painter);
+    drawHP(&painter);
+    drawPlayerGold(&painter);
 
 }
 void playscene::mousePressEvent(QMouseEvent *e)
@@ -162,6 +307,7 @@ void playscene::mousePressEvent(QMouseEvent *e)
 
         ifdrawkk=true;//框框，就是选择放哪个炮塔时候的那个
         drawkkpos=realpos;
+
         mypushbutton2 *stb1=new mypushbutton2(":/res/TBottle/pic12.png",":/res/TBottle/pic13.png");
         stb1->setParent(this);
         stb1->move(drawkkpos.x()-100,drawkkpos.y()+100);
@@ -180,8 +326,11 @@ void playscene::mousePressEvent(QMouseEvent *e)
          stbcancel->show();
         update();
         connect(stb1,&QPushButton::clicked,[=](){
+            if(canBuyTower())
+            {
            tower *t=new tower(realpos,this);
            towersList.push_back(t);
+            minusgold(TowerCost);}
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
            delete stb1;delete  stb2;delete stb3;delete stbcancel;
@@ -190,8 +339,11 @@ void playscene::mousePressEvent(QMouseEvent *e)
            update();
         });
         connect(stb2,&QPushButton::clicked,[=](){
+            if(canBuyTower())
+            {
            tower *t=new tower(realpos,this);
            towersList.push_back(t);
+            minusgold(TowerCost);}
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
            delete stb1;delete  stb2;delete stb3;delete stbcancel;
@@ -200,8 +352,11 @@ void playscene::mousePressEvent(QMouseEvent *e)
            update();
         });
         connect(stb3,&QPushButton::clicked,[=](){
+            if(canBuyTower())
+            {
            tower *t=new tower(realpos,this);
            towersList.push_back(t);
+            minusgold(TowerCost);}
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
            delete stb1;delete  stb2;delete stb3;delete stbcancel;
@@ -237,4 +392,13 @@ void playscene::drawkk(QPainter *painter)
 //    stb2->move(drawkkpos.x(),drawkkpos.y()+100);
 //    mypushbutton2 *stb3=new mypushbutton2(":/res/TBlueStar/pic50");
 //    stb3->move(drawkkpos.x()+100,drawkkpos.y()+100);
+}
+
+void playscene::gameStart()
+{
+    loadWave();
+}
+QList<monster *> playscene::enemyList() const
+{
+    return enemylist;
 }

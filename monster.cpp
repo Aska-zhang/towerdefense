@@ -4,6 +4,8 @@
 #include <QMatrix>
 #include <QVector2D>
 #include <QtMath>
+#include<QObject>
+#include"playscene.h"
 //monster::monster(QObject *parent) : QObject(parent)
 //{
 
@@ -11,8 +13,8 @@
 static const int Health_Bar_Width = 50;
 
 const QSize monster::fixedSize(100, 100);
-monster::monster(moveway *startpoint, MainWindow *gamee,QString picture):
-    alive(false),maxHP(100),currentHP(100),speed(1.0),rotationSprite(0.0)
+monster::monster(moveway *startpoint, playscene *gamee,QString picture):
+    alive(false),maxHP(100),currentHP(100),speed(2.0),rotationSprite(0.0)
   ,pos(startpoint->pos()),destinationpoint(startpoint->nextWayPoint()),game(gamee)
 
 {
@@ -46,7 +48,7 @@ void monster::getDamage(int damage)
     if (currentHP <= 0)
     {
         //m_game->audioPlayer()->playSound(EnemyDestorySound);
-        //game->awardGold(200);
+        game->awardGold(200);
         getRemoved();
     }
 }
@@ -58,8 +60,8 @@ void monster::getRemoved()
 
     foreach (tower *attacker, attackedtowerslist)
         attacker->targetKilled();
-    // 通知game,此敌人已经阵亡
-    //game->removedEnemy(this);
+//     通知game,此敌人已经阵亡
+    game->removedEnemy(this);
 }
 
 void monster::gotLostSight(tower *attacker)
@@ -75,7 +77,7 @@ void monster::draw(QPainter *painter) const
 
     painter->save();
 
-    QPoint healthBarPoint = pos + QPoint(-Health_Bar_Width / 2 - 5, -fixedSize.height() / 3);
+    QPoint healthBarPoint = pos + QPoint(-Health_Bar_Width / 2 - 5, -fixedSize.height() / 3-8);
     // 绘制血条
     painter->setPen(Qt::NoPen);
     painter->setBrush(Qt::red);
@@ -86,17 +88,24 @@ void monster::draw(QPainter *painter) const
     QRect healthBarRect(healthBarPoint, QSize((double)currentHP / maxHP * Health_Bar_Width, 2));
     painter->drawRect(healthBarRect);
 
+
+
     // 绘制偏转坐标,由中心+偏移=左上
     static const QPoint offsetPoint(-fixedSize.width() / 2, -fixedSize.height() / 2);
     painter->translate(pos);
-    painter->rotate(rotationSprite);
+//    painter->rotate(rotationSprite);
     // 绘制敌人
     //painter->drawPixmap(offsetPoint, m_sprite);
 
     QPixmap pix;
-    pix.load(pic);
+    pix.load(":/res/Monsters1/pic1.png");
     pix.scaled(160,160);
     painter->drawPixmap(offsetPoint.x(),offsetPoint.y(),pix.width()*1.6,pix.height()*1.59,pix);
+//    QPixmap pix;
+//    pix.load(pic);
+//    pix.load(":/res/Monsters1/pic1.png");
+//    pix.scaled(160,160);
+//    painter->drawPixmap(offsetPoint.x(),offsetPoint.y(),pix.width()*1.6,pix.height()*1.59,pix);
 
     painter->restore();
 }
@@ -117,8 +126,8 @@ void monster::move()
         else
         {
             // 表示进入基地
-//           game->getHpDamage();
-//            game->removedEnemy(this);
+           game->getHpDamage();
+            game->removedEnemy(this);
             return;
         }
     }

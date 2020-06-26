@@ -7,6 +7,7 @@
 #include<QPainter>
 #include<QTimer>
 //#include<playscene.h>
+#include"bullet.h"
 class playscene;
 class tower : public QObject
 {
@@ -20,6 +21,9 @@ public:
     void chooseEnemyForAttack(monster *m);
     void targetKilled();
     void lostSightOfEnemy();
+    void checkEnemyInRange();
+    void damageEnemy();
+    void removeBullet();
 
 
 protected:
@@ -32,6 +36,7 @@ protected:
     bool attacking;
     monster *choose;//选择攻击的目标
     qreal rotationSprite;
+    playscene * thisgame;
 
     QTimer * fireRateTimer;
 

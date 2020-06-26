@@ -8,6 +8,7 @@
 #include <QObject>
 #include<QPainter>
 #include"monster.h"
+#include<QVariantAnimation>
 class playscene;
 
 class bullet : public QObject
@@ -31,6 +32,7 @@ protected:
     playscene *	game;
     int damage;
     static const QSize fixedSize;
+    QVariantAnimation  *animate;
 signals:
 
 public slots:

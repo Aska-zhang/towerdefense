@@ -459,5 +459,7 @@
         <file>res/TBottle/TBottle-dz.png</file>
         <file>res/TPlane/TPlane-dz.png</file>
         <file>res/TBottle/pic25.png</file>
+        <file>res/TBottle/pic26.jpg</file>
+        <file>res/TBottle/pic27.png</file>
     </qresource>
 </RCC>

@@ -105,7 +105,7 @@ chooselevel::chooselevel(QWidget *parent) : QMainWindow(parent)
 
             //进入到游戏场景
             this->hide(); //将选关场景隐藏掉
-            play = new playscene(i+1,turn[i],q[i],background[i],playway[i]); //创建游戏场景
+            play = new playscene(i+1,turn[i],carrot[i],q[i][0],q[i],background[i],playway[i]); //创建游戏场景
             play->show();//显示游戏场景
 
             connect(play,&playscene::choosesceneback,[=](){
