@@ -41,13 +41,13 @@ void monster::getAttacked(tower *attacker)
 }
 void monster::getDamage(int damage)
 {
-    //m_game->audioPlayer()->playSound(LaserShootSound);
+    game->audioPlayer->playSound(bottle);
     currentHP -= damage;
 
     // 阵亡,需要移除
     if (currentHP <= 0)
     {
-        //m_game->audioPlayer()->playSound(EnemyDestorySound);
+        game->audioPlayer->playSound(Fat142);
         game->awardGold(40);
         getRemoved();
     }

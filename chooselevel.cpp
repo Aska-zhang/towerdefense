@@ -41,7 +41,9 @@ chooselevel::chooselevel(QWidget *parent) : QMainWindow(parent)
                       ,QPoint(this->width()*0.84,this->height()*0.17),QPoint(this->width()*0.856,this->height()*0.68),QPoint(this->width()*0.851,this->height()*0.2)
                       ,QPoint(this->width()*0.77,this->height()*0.19),QPoint(this->width()*0.91,this->height()*0.69),QPoint(this->width()*0.91,this->height()*0.69)};
 
+    //拐弯的个数
     int turn[12]={8,6,2,10,6,9,7,9,9,8,4,9};
+    //拐弯的地方
     QPoint Q[12][10]={{QPoint(150,237.5),QPoint(150, 537.5),QPoint(462.5, 537.5)
                      ,QPoint(462.5, 425),QPoint(762.5, 425),QPoint(762.5, 537.5)
                      ,QPoint(1058.5, 537.5),QPoint(1058.5, 237.5),QPoint(0,0),QPoint(0,0)},
@@ -111,7 +113,7 @@ chooselevel::chooselevel(QWidget *parent) : QMainWindow(parent)
             connect(play,&playscene::choosesceneback,[=](){
                 this->show();
                 delete play;
-                play = NULL;
+                play = nullptr;
             });
 
         });

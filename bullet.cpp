@@ -21,6 +21,9 @@ bullet::~bullet()
 {
     target=nullptr;
     game=nullptr;
+    animation->stop();
+    delete animation;
+//    delete duration;
 }
 
 void bullet::draw(QPainter *painter) const
@@ -48,7 +51,7 @@ void bullet::move()
 //    animate->start();
     // 100毫秒内击中敌人
     static const int duration = 600;
-    QPropertyAnimation *animation = new QPropertyAnimation(this, "currentpos");
+    animation = new QPropertyAnimation(this, "currentpos");
     animation->setDuration(duration);
     animation->setStartValue(startpos);
     animation->setEndValue(targetpos);
@@ -73,6 +76,8 @@ void bullet::hitTarget()
     // 因此先判断下敌人是否还有效
     if (game->enemyList().indexOf(target) != -1)
         target->getDamage(damage);
+    animation->stop();
+//    delete animation;
     game->removedBullet(this);
 }
 

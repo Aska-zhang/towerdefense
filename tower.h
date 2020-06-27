@@ -24,7 +24,7 @@ public:
     virtual void checkEnemyInRange();
     void damageEnemy();
     void removeBullet();
-    QPoint position()const{return pos;}
+    inline QPoint position()const{return pos;}
     virtual void upgrade(){};
 
     int gettag(){return tag;}
@@ -32,7 +32,7 @@ public:
 protected:
     int attackrange;//攻击范围
     int damage;//伤害
-    int HP;
+//    int HP;
     int firerate;//攻击频率
     int tag;
     QString picway;

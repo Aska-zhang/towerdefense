@@ -468,5 +468,17 @@
         <file>res/TBlueStar/pic66.png</file>
         <file>res/TPin/pic27.png</file>
         <file>res/TPin/pic28.png</file>
+        <file>music/BGMusic.mp3</file>
+        <file>music/BigBoss.mp3</file>
+        <file>music/bottle.mp3</file>
+        <file>music/Fat142.mp3</file>
+        <file>music/pin.mp3</file>
+        <file>music/PStar.mp3</file>
+        <file>music/TowerBulid.mp3</file>
+        <file>music/TowerDeselect.mp3</file>
+        <file>music/TowerSelect.mp3</file>
+        <file>music/TowerSell.mp3</file>
+        <file>music/TowerUpdata.mp3</file>
+        <file>music/BGM.mp3</file>
     </qresource>
 </RCC>

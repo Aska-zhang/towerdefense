@@ -4,6 +4,7 @@
 #include<QDebug>
 #include"mypushbutton.h"
 #include<QTimer>
+#include<QMediaPlayer>
 
 
 MainScene::MainScene(QWidget *parent) :
@@ -32,6 +33,15 @@ MainScene::MainScene(QWidget *parent) :
     startbtn3->setParent(this);
     startbtn3->move(this->width()  - startbtn3->width()-30 ,this->height() * 0.83 );
 
+    audioPlayer = new AudioPlayer(1,this);
+    audioPlayer->startBGM();
+
+//    QMediaPlayer* player = new QMediaPlayer;
+//    player->setMedia(QUrl("qrc:/music/BGMusic.mp3"));//指定源为qrc文件
+//    player->setVolume(50);
+//    player->play();
+
+
 
     //点击后进入选关
     choosescene=new chooselevel;
@@ -41,6 +51,7 @@ MainScene::MainScene(QWidget *parent) :
 
         //延时进入到选择关卡场景中,延时0.5秒后进入
         QTimer::singleShot(500,this,[=](){
+            audioPlayer->stopBGM();
             //自身隐藏
             this->hide();
             //显示选择关卡场景
@@ -57,8 +68,10 @@ MainScene::MainScene(QWidget *parent) :
 
 
     connect(choosescene,&chooselevel::choosesceneback,this,[=](){
+
         choosescene->hide(); //将选择关卡场景 隐藏掉
         this->show(); //重新显示主场景
+        audioPlayer->startBGM();
     });
 
 

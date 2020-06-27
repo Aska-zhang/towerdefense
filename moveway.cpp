@@ -5,7 +5,7 @@
 //{
 
 //}
-moveway::moveway(QPoint pos):posnow(pos),nextpoint(NULL)
+moveway::moveway(QPoint pos):posnow(pos),nextpoint(nullptr)
 {
 
 }

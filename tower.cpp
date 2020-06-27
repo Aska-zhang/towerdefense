@@ -31,7 +31,7 @@ tower::tower(QPoint p,int tagg, playscene *game)
 tower::~tower()
 {
     delete fireRateTimer;
-    fireRateTimer = NULL;
+    fireRateTimer = nullptr;
 }
 
 void tower::draw(QPainter *painter) const

@@ -8,7 +8,7 @@ Bottle::Bottle(QPoint p,int tagg, playscene *game):tower(p,tagg,game)
     attackrange=200;
     damage=20;
     firerate=1000;
-    choose=NULL;
+    choose=nullptr;
     pos=p;
     rotationSprite=0.0;
     thisgame=game;

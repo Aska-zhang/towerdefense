@@ -18,6 +18,7 @@ public:
     ~MainScene();
 
     void paintEvent(QPaintEvent *);
+    AudioPlayer * audioPlayer;
 
     chooselevel *choosescene = NULL;
 

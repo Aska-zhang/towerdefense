@@ -13,6 +13,8 @@
 #include"tower.h"
 #include"bullet.h"
 #include"monster.h"
+#include"audioplayer.h"
+#include <QMediaPlayer>
 //playscene::playscene(QWidget *parent) : QMainWindow(parent)
 //{
 
@@ -29,6 +31,7 @@ playscene::playscene(int levelNum,int turns,QPoint carrotp,QPoint en,QPoint *Qtu
     wave=0;
 
     this->setAttribute(Qt::WA_DeleteOnClose,1);
+
     this->levelIndex = levelNum;
     ifdrawkk=false;
     //设置标题
@@ -76,6 +79,9 @@ playscene::playscene(int levelNum,int turns,QPoint carrotp,QPoint en,QPoint *Qtu
 
     addwaypoints();
 
+    audioPlayer = new AudioPlayer(2,this);
+    audioPlayer->startBGM();
+
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(updateMap()));
     timer->start(20);
@@ -109,7 +115,7 @@ void playscene::addwaypoints()//添加地图上的拐点,根据关卡找turn指�
 
 void playscene::getHpDamage(int damage)
 {
-//	m_audioPlayer->playSound(LifeLoseSound);
+    audioPlayer->playSound(BigBoss);
     Hp -= damage;
     if (Hp <= 0)
         doGameOver();
@@ -408,6 +414,7 @@ void playscene::mousePressEvent(QMouseEvent *e)
 
         ifdrawkk=true;//框框，就是选择放哪个炮塔时候的那个
         drawkkpos=realpos;
+        audioPlayer->playSound(Towerselect);
 
         mypushbutton2 *stb1=new mypushbutton2(":/res/TBottle/pic12.png",":/res/TBottle/pic13.png");
         stb1->setParent(this);
@@ -432,15 +439,17 @@ void playscene::mousePressEvent(QMouseEvent *e)
            if(canBuyTower(t))
            {
            towersList.push_back(t);
-            minusgold(t->cost);}
+            minusgold(t->cost);
+           canputtower[x1][y1]=false;
+           audioPlayer->playSound(TowerBuild);}
            else {
-               delete t;
+               delete t;canputtower[x1][y1]=true;
            }
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
            delete stb1;delete  stb2;delete stb3;delete stbcancel;
            ifdrawkk=false;
-           canputtower[x1][y1]=false;
+//           canputtower[x1][y1]=false;
            update();
         });
         connect(stb2,&QPushButton::clicked,[=](){
@@ -449,15 +458,18 @@ void playscene::mousePressEvent(QMouseEvent *e)
            if(canBuyTower(t))
            {
            towersList.push_back(t);
-            minusgold(t->cost);}
+            minusgold(t->cost);
+           canputtower[x1][y1]=false;
+           audioPlayer->playSound(TowerBuild);}
            else {
                delete t;
+               canputtower[x1][y1]=true;
            }
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
            delete stb1;delete  stb2;delete stb3;delete stbcancel;
            ifdrawkk=false;
-           canputtower[x1][y1]=false;
+//           canputtower[x1][y1]=false;
            update();
         });
         connect(stb3,&QPushButton::clicked,[=](){
@@ -466,20 +478,23 @@ void playscene::mousePressEvent(QMouseEvent *e)
            if(canBuyTower(t))
            {
            towersList.push_back(t);
-            minusgold(t->cost);}
+            minusgold(t->cost);
+           canputtower[x1][y1]=false;
+           audioPlayer->playSound(TowerBuild);}
            else {
                delete t;
+               canputtower[x1][y1]=true;
            }
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
            delete stb1;delete  stb2;delete stb3;delete stbcancel;
            ifdrawkk=false;
-           canputtower[x1][y1]=false;
+
            update();
         });
         connect(stbcancel,&QPushButton::clicked,[=](){
             delete stb1;delete  stb2;delete stb3;delete stbcancel;
-            ifdrawkk=false;
+            ifdrawkk=false;canputtower[x1][y1]=true;
             update();
         });
         }
@@ -490,23 +505,26 @@ void playscene::mousePressEvent(QMouseEvent *e)
                     if(t->gettag()==1)
                     {
 //                        t=dynamic_cast<Bottle *>(t);
-                        if(dynamic_cast<Bottle *>(t)->upgrade==false)
+                        if(dynamic_cast<Bottle *>(t)->upgrade==false&&dynamic_cast<Bottle *>(t)->upcost<playrGold)
                         {dynamic_cast<Bottle *>(t)->up();
-                        playrGold-=dynamic_cast<Bottle *>(t)->upcost;}
+                        playrGold-=dynamic_cast<Bottle *>(t)->upcost;
+                        audioPlayer->playSound(Towerupdata);}
                     }
                     if(t->gettag()==2)
                     {
 //                        t=dynamic_cast<Pin *>(t);
-                        if(dynamic_cast<Pin *>(t)->upgrade==false)
+                        if(dynamic_cast<Pin *>(t)->upgrade==false&&dynamic_cast<Pin *>(t)->upcost<playrGold)
                         {dynamic_cast<Pin *>(t)->up();
-                        playrGold-=dynamic_cast<Pin *>(t)->upcost;}
+                        playrGold-=dynamic_cast<Pin *>(t)->upcost;
+                        audioPlayer->playSound(Towerupdata);}
                     }
                     if(t->gettag()==3)
                     {
 //                        t=dynamic_cast<Pin *>(t);
-                        if(dynamic_cast<star *>(t)->upgrade==false)
+                        if(dynamic_cast<star *>(t)->upgrade==false&&dynamic_cast<star *>(t)->upcost<playrGold)
                         {dynamic_cast<star *>(t)->up();
-                        playrGold-=dynamic_cast<star *>(t)->upcost;}
+                        playrGold-=dynamic_cast<star *>(t)->upcost;
+                        audioPlayer->playSound(Towerupdata);}
                     }
 
                 }
@@ -528,6 +546,7 @@ void playscene::mousePressEvent(QMouseEvent *e)
                 delete t;
                 canputtower[x1][y1]=true;
                 playrGold+=TowerCost*0.8;
+                audioPlayer->playSound(TowerSell);
             }
         }
     }

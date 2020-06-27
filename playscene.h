@@ -18,6 +18,7 @@
 #include"bulletpin.h"
 #include"bulletstar.h"
 #include"bullet.h"
+#include"audioplayer.h"
 class monster;class monster1;class monster2;class monster3;
 class Bottle;class star;class pin;class bulletpin;
 class bulletstar;class bulletbottle;
@@ -40,7 +41,7 @@ public:
     QPoint carrotpos;
     void mousePressEvent(QMouseEvent *e);
     QPoint pos[12][8];
-    void drawkk(QPainter *painter);
+    void drawkk(QPainter *painter);//画点击地图看有什么炮塔的那个方框的函数
 
     void addwaypoints();
     void getHpDamage(int damage = 1);
@@ -56,6 +57,7 @@ public:
     void drawHP(QPainter *painter);
     void drawPlayerGold(QPainter *painter);
     void doGameOver();
+    AudioPlayer* audioPlayer;
 
 private:
     int	wave;
@@ -72,10 +74,11 @@ private:
     QPoint entry;
 
 
+
     QList<moveway *> waypointslist;
     QList<monster *> enemylist;
     QList<bullet *> bulletlist;
-    QList<QVariant> wavesInfo;
+//    QList<QVariant> wavesInfo;
 
 //    QList<monster *> enemy0list;
 //    QList<monster1 *> enemy1list;

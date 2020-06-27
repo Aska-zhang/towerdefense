@@ -7,7 +7,7 @@ bulletbottle::bulletbottle(QPoint startp, QPoint targetpoint,int damagee, bool u
 }
 bulletbottle::~bulletbottle()
 {
-
+//    target=nullptr;
 }
 void bulletbottle::draw(QPainter *painter) const
 {
