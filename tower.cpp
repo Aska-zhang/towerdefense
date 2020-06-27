@@ -10,7 +10,7 @@
 #include<QDebug>
 
 const QSize tower::fixedSize(100, 100);
-tower::tower(QPoint p, playscene *game)
+tower::tower(QPoint p,int tagg, playscene *game)
 {
     attacking=false;
     attackrange=200;
@@ -20,6 +20,7 @@ tower::tower(QPoint p, playscene *game)
     pos=p;
     rotationSprite=0.0;
     thisgame=game;
+    tag=tagg;
 
     fireRateTimer = new QTimer(this);
     connect(fireRateTimer, SIGNAL(timeout()), this, SLOT(shootWeapon()));
@@ -45,8 +46,8 @@ void tower::draw(QPainter *painter) const
     painter->drawEllipse(pos.x()+fixedSize.width() / 2-attackrange,pos.y()+fixedSize.height() / 2-attackrange, attackrange*2, attackrange*2);
 
 
-    pix.load(":/res/TBottle/pic27.png");
-    pix=pix.scaled(50,100);
+    pix.load(":/res/TBottle/pic28.png");
+    pix=pix.scaled(64,100);
     //painter->drawPixmap(pos.x(),pos.y(),pix.width(),pix.height(),pix);
     // 绘制偏转坐标,由中心+偏移=左上
     static const QPoint offsetPoint(-fixedSize.width() / 2, -fixedSize.height() / 2);
@@ -54,7 +55,7 @@ void tower::draw(QPainter *painter) const
     painter->translate(QPoint(pos.x()+fixedSize.width() / 2,pos.y()+fixedSize.height() / 2));
     painter->rotate(rotationSprite);
 
-    painter->drawPixmap(offsetPoint.x()+25,offsetPoint.y(),pix.width(),pix.height(),pix);
+    painter->drawPixmap(offsetPoint.x()+20,offsetPoint.y(),pix.width(),pix.height(),pix);
     painter->setPen(Qt::red);
     painter->drawEllipse(QPoint(0,0), 5, 5);
     painter->restore();
@@ -62,7 +63,7 @@ void tower::draw(QPainter *painter) const
 }
 void tower::shootWeapon()
 {
-    bullet *bullets = new bullet(pos, choose->position(), damage, choose, thisgame);
+    bullet *bullets = new bullet(pos, choose->position(), damage,0, choose, thisgame);
     qDebug()<<"*";
     bullets->move();
     thisgame->addBullet(bullets);

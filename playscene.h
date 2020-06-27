@@ -8,8 +8,20 @@
 #include"bullet.h"
 #include"moveway.h"
 #include"monster.h"
+#include"monster1.h"
+#include"monster2.h"
+#include"monster3.h"
+#include"bottle.h"
+#include"star.h"
+#include"pin.h"
+#include"bulletbottle.h"
+#include"bulletpin.h"
+#include"bulletstar.h"
 #include"bullet.h"
-class monster;
+class monster;class monster1;class monster2;class monster3;
+class Bottle;class star;class pin;class bulletpin;
+class bulletstar;class bulletbottle;
+
 class playscene : public QMainWindow
 {
     Q_OBJECT
@@ -39,7 +51,7 @@ public:
     void minusgold(int gold);
     QList<monster *> enemyList() const;
 
-    bool canBuyTower() const;
+    bool canBuyTower(tower* t) const;
     void drawWave(QPainter *painter);
     void drawHP(QPainter *painter);
     void drawPlayerGold(QPainter *painter);
@@ -64,6 +76,19 @@ private:
     QList<monster *> enemylist;
     QList<bullet *> bulletlist;
     QList<QVariant> wavesInfo;
+
+//    QList<monster *> enemy0list;
+//    QList<monster1 *> enemy1list;
+//    QList<monster2 *> enemy2list;
+//    QList<monster3 *> enemy3list;
+
+//    QList<Bottle *> BottleList;
+//    QList<star *> starList;
+//    QList<pin *> pinList;
+
+//    QList<bulletbottle *> bulletbottlelist;
+//    QList<bulletstar *> bulletstarlist;
+//    QList<bulletpin *> bulletpinlist;
 
 
     bool loadWave();

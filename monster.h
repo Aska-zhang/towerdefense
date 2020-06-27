@@ -13,15 +13,18 @@ class monster : public QObject
     Q_OBJECT
 public:
     //explicit monster(QObject *parent = nullptr);
-    explicit monster(moveway *startpoint, playscene *gamee,QString picture);
-    ~monster();
-    void draw(QPainter *painter) const;
+    explicit monster(moveway *startpoint,int tagg,int hp, playscene *gamee,QString picture);
+    virtual ~monster();
+    virtual void draw(QPainter *painter) const;
     void move();
     void getDamage(int damage);
     void getRemoved();
     void getAttacked(tower *attacker);
     void gotLostSight(tower *attacker);
     QPoint position() const;
+    int tag;
+    void changespped(qreal s){speed=s;}
+    qreal getspeed(){return speed;}
 
 
 protected:

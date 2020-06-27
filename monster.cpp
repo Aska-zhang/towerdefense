@@ -13,9 +13,9 @@
 static const int Health_Bar_Width = 50;
 
 const QSize monster::fixedSize(100, 100);
-monster::monster(moveway *startpoint, playscene *gamee,QString picture):
-    alive(false),maxHP(100),currentHP(100),speed(2.0),rotationSprite(0.0)
-  ,pos(startpoint->pos()),destinationpoint(startpoint->nextWayPoint()),game(gamee)
+monster::monster(moveway *startpoint,int tagg, int hp,playscene *gamee,QString picture):
+    alive(false),maxHP(hp),currentHP(hp),speed(2.0),rotationSprite(0.0),pic(picture)
+  ,pos(startpoint->pos()),destinationpoint(startpoint->nextWayPoint()),game(gamee),tag(tagg)
 
 {
 
@@ -48,7 +48,7 @@ void monster::getDamage(int damage)
     if (currentHP <= 0)
     {
         //m_game->audioPlayer()->playSound(EnemyDestorySound);
-        game->awardGold(200);
+        game->awardGold(40);
         getRemoved();
     }
 }
@@ -98,14 +98,10 @@ void monster::draw(QPainter *painter) const
     //painter->drawPixmap(offsetPoint, m_sprite);
 
     QPixmap pix;
-    pix.load(":/res/Monsters1/pic1.png");
+//    pix.load(":/res/Monsters1/pic1.png");
+    pix.load(pic);
     pix.scaled(160,160);
     painter->drawPixmap(offsetPoint.x(),offsetPoint.y(),pix.width()*1.6,pix.height()*1.59,pix);
-//    QPixmap pix;
-//    pix.load(pic);
-//    pix.load(":/res/Monsters1/pic1.png");
-//    pix.scaled(160,160);
-//    painter->drawPixmap(offsetPoint.x(),offsetPoint.y(),pix.width()*1.6,pix.height()*1.59,pix);
 
     painter->restore();
 }

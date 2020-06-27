@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui multimedia
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -34,7 +35,17 @@ SOURCES += \
     tower.cpp \
     mypushbutton2.cpp \
     bullet.cpp \
-    moveway.cpp
+    moveway.cpp \
+    bottle.cpp \
+    pin.cpp \
+    star.cpp \
+    bulletbottle.cpp \
+    bulletpin.cpp \
+    bulletstar.cpp \
+    monster1.cpp \
+    monster2.cpp \
+    monster3.cpp \
+    audioplayer.cpp
 
 HEADERS += \
         mainscene.h \
@@ -46,7 +57,17 @@ HEADERS += \
     mypushbutton2.h \
     bullet.h \
     moveway.h \
-    collisioncheck.h
+    collisioncheck.h \
+    bottle.h \
+    pin.h \
+    star.h \
+    bulletbottle.h \
+    bulletpin.h \
+    bulletstar.h \
+    monster1.h \
+    monster2.h \
+    monster3.h \
+    audioplayer.h
 
 FORMS += \
         mainscene.ui

@@ -8,6 +8,8 @@
 #include <QtGlobal>
 #include <QMessageBox>
 #include<math.h>
+#include<QtMath>
+#include<cmath>
 #include"tower.h"
 #include"bullet.h"
 #include"monster.h"
@@ -24,7 +26,9 @@ playscene::playscene(int levelNum,int turns,QPoint carrotp,QPoint en,QPoint *Qtu
     entry=en;
     Hp=10;
     playrGold=1000;gameEnded=false;gameWin=false;
+    wave=0;
 
+    this->setAttribute(Qt::WA_DeleteOnClose,1);
     this->levelIndex = levelNum;
     ifdrawkk=false;
     //设置标题
@@ -53,9 +57,19 @@ playscene::playscene(int levelNum,int turns,QPoint carrotp,QPoint en,QPoint *Qtu
     //点击返回
     connect(backBtn,&mypushbutton::clicked,[=](){
 //        qDebug() << "翻金币场景中：点击了返回按钮";
+//        foreach ( tower *t, towersList)
+//            delete t;
+//        foreach ( moveway *wayPoint, waypointslist)
+//            delete wayPoint;
+//        foreach ( monster *enemy, enemylist)
+//            delete enemy;
+//        foreach ( bullet *bullets, bulletlist)
+//            delete bullets;
 
         QTimer::singleShot(500,this,[=](){
+            this->close();
             emit this->choosesceneback();
+//            this->close();
         });
 
     });
@@ -66,6 +80,7 @@ playscene::playscene(int levelNum,int turns,QPoint carrotp,QPoint en,QPoint *Qtu
     connect(timer, SIGNAL(timeout()), this, SLOT(updateMap()));
     timer->start(20);
 //300ms后开始游戏
+    qDebug()<<"*1";
     QTimer::singleShot(300, this, SLOT(gameStart()));
 
 
@@ -128,6 +143,9 @@ void playscene::removedBullet(bullet *bullets)
 
 void  playscene::updateMap()
 {
+    if(Hp<=0)
+        doGameOver();
+//        gameEnded=true;
     foreach (monster *enemy, enemylist)
         enemy->move();
     foreach (tower *t, towersList)
@@ -144,10 +162,25 @@ void playscene::addBullet(bullet *bullets)
     bulletlist.push_back(bullets);
 }
 
-bool playscene::canBuyTower() const
+bool playscene::canBuyTower(tower* t) const
 {
-    if (playrGold >= TowerCost)
-        return true;
+    if(t->gettag()==1)
+    {
+        if (playrGold >= dynamic_cast<Bottle*>(t)->cost)
+            return true;
+    }
+    if(t->gettag()==2)
+    {
+        if (playrGold >= dynamic_cast<Pin*>(t)->cost)
+            return true;
+    }
+    if(t->gettag()==3)
+    {
+        if (playrGold >= dynamic_cast<star*>(t)->cost)
+            return true;
+    }
+//    if (playrGold >= dynamic_cast<Bottle*>(t)->cost)
+//        return true;
     return false;
 }
 
@@ -203,22 +236,72 @@ bool playscene::loadWave()
 //		QMap<QString, QVariant> dict = curWavesInfo[i].toMap();
 //		int spawnTime = dict.value("spawnTime").toInt();
 
-        QString q=":/res/Monster1/pic1.png";
+    QString q[12]={":/res/Monsters1/pic1.png",":/res/Monsters1/pic2.png",":/res/Monsters1/pic3.png",":/res/Monsters1/pic4.png",
+                  ":/res/Monsters2/pic5.png",":/res/Monsters2/pic4.png",":/res/Monsters2/pic23.png",":/res/Monsters2/pic3.png",
+                  ":/res/Monsters3/pic15.png",":/res/Monsters3/pic2.png",":/res/Monsters3/pic3.png",":/res/Monsters3/pic12.png"};
 //		monster *enemy = new monster(startWayPoint, this,q);
 //		enemylist.push_back(enemy);
 //		QTimer::singleShot(spawnTime, enemy, SLOT(doActivate()));
 //	}
 
 //	return true;
-    if (wave >= 6)
-            return false;
+//    qDebug()<<wave;
+    if (wave >= 21)
+            {
+        gameWin=true;
+        return false;
+    }
        moveway *startWayPoint = waypointslist.back(); // 这里是个逆序的，尾部才是其实节点
-        int enemyStartInterval[] = { 100, 2100, 4100, 6100, 8100, 10100 };
-        for (int i = 0; i < 6; ++i)
+        int enemyStartInterval[] = { 100, 2100, 4100, 6100, 8100, 10100,12100,14100,16100,18100 };
+        int hp1,hp2;
+        if(wave<=15)//随着波数增加，怪物的血量上升
         {
-            monster *enemy = new monster(startWayPoint, this,q);
-            enemylist.push_back(enemy);
-            QTimer::singleShot(enemyStartInterval[i],enemy, SLOT(becomealive()));
+            hp1=150*floor(wave/5+1);
+            hp2=220*floor(wave/5+1);
+        }
+        int i1,i2,i3,i4;
+        if(levelIndex<=4)
+        {
+            i1=0;i2=1;i3=2;i4=3;
+        }
+        if(levelIndex>=5&&levelIndex<=8)
+        {
+            i1=4;i2=5;i3=6;i4=7;
+        }
+        if(levelIndex>=9&&levelIndex<=12)
+        {
+            i1=8;i2=9;i3=10;i4=11;
+        }
+
+        for (int i = 0; i < 10; ++i)
+        {
+            if(wave%4==1)
+            {
+                monster *enemy = new monster(startWayPoint,1,hp1 ,this,q[i2]);
+                enemylist.push_back(enemy);
+                QTimer::singleShot(enemyStartInterval[i],enemy, SLOT(becomealive()));
+            }
+            if(wave%4==2)
+            {
+                monster1 *enemy = new monster1(startWayPoint,2,hp2, this,q[i3]);
+                enemylist.push_back(enemy);
+                QTimer::singleShot(enemyStartInterval[i],enemy, SLOT(becomealive()));
+            }
+            if(wave%4==3)
+            {
+                monster2 *enemy = new monster2(startWayPoint,3,hp2 ,this,q[i4]);
+                enemylist.push_back(enemy);
+                QTimer::singleShot(enemyStartInterval[i],enemy, SLOT(becomealive()));
+            }
+            if(wave%4==0)
+            {
+                monster3 *enemy = new monster3(startWayPoint,4,hp1 ,this,q[i1]);
+                enemylist.push_back(enemy);
+                QTimer::singleShot(enemyStartInterval[i],enemy, SLOT(becomealive()));
+            }
+//            monster *enemy = new monster(startWayPoint,1, this,q);
+//            enemylist.push_back(enemy);
+//            QTimer::singleShot(enemyStartInterval[i],enemy, SLOT(becomealive()));
         }
         return true;
 }
@@ -231,8 +314,25 @@ void playscene::paintEvent(QPaintEvent *)
         QPainter painter(this);
         painter.setPen(QPen(Qt::red));
         painter.drawText(rect(), Qt::AlignCenter, text);
+//        return;
+    }
+    if (gameEnded)
+    {
+        QPainter painter1(this);
+        QPixmap pix1;
+        pix1.load(":/res/gameover0/pic23.png");
+        painter1 .drawPixmap(0,0,this->width(),this->height(),pix1);
         return;
     }
+
+    if (gameWin)
+    {
+        QPainter painter(this);
+        QPixmap pix;
+        pix.load(":/res/gameover0/pic34.png");
+        painter .drawPixmap(0,0,this->width(),this->height(),pix);
+    }
+
     QPainter painter(this);
     QPixmap pix;
     pix.load(picturepath);
@@ -299,9 +399,10 @@ void playscene::mousePressEvent(QMouseEvent *e)
 
     QPoint pressPos=e->pos();
     QPoint realpos=QPoint(floor(pressPos.x()/100)*100,floor(pressPos.y()/100)*100);
+    int x1=floor(pressPos.x()/100);int y1=floor(pressPos.y()/100);
     if(e->button()==Qt::LeftButton)
     {
-        int x1=floor(pressPos.x()/100);int y1=floor(pressPos.y()/100);
+
         if(canputtower[x1][y1])
         {
 
@@ -312,7 +413,7 @@ void playscene::mousePressEvent(QMouseEvent *e)
         stb1->setParent(this);
         stb1->move(drawkkpos.x()-100,drawkkpos.y()+100);
         stb1->show();
-        mypushbutton2 *stb2 = new mypushbutton2(":/res/TPlane/pic10.png" , ":/res/TPlane/pic11.png");
+        mypushbutton2 *stb2 = new mypushbutton2(":/res/TPin/pic1.png" , ":/res/TPin/pic2.png");
         stb2->setParent(this);
         stb2->move(drawkkpos.x(),drawkkpos.y()+100);
         stb2->show();
@@ -320,17 +421,21 @@ void playscene::mousePressEvent(QMouseEvent *e)
         stb3->setParent(this);
         stb3->move(drawkkpos.x()+100,drawkkpos.y()+100);
         stb3->show();
-        mypushbutton2 * stbcancel=new mypushbutton2(":/res/TBlueStar/pic50.png",":/res/TBlueStar/pic17.png");
+        mypushbutton2 * stbcancel=new mypushbutton2(":/res/mainscene/LevelIcon.png",":/res/TBlueStar/pic17.png");
          stbcancel->setParent(this);
          stbcancel->move(drawkkpos.x()+200,drawkkpos.y()+100);
          stbcancel->show();
         update();
         connect(stb1,&QPushButton::clicked,[=](){
-            if(canBuyTower())
-            {
-           tower *t=new tower(realpos,this);
+
+           Bottle *t=new Bottle(realpos,1,this);
+           if(canBuyTower(t))
+           {
            towersList.push_back(t);
-            minusgold(TowerCost);}
+            minusgold(t->cost);}
+           else {
+               delete t;
+           }
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
            delete stb1;delete  stb2;delete stb3;delete stbcancel;
@@ -339,11 +444,15 @@ void playscene::mousePressEvent(QMouseEvent *e)
            update();
         });
         connect(stb2,&QPushButton::clicked,[=](){
-            if(canBuyTower())
-            {
-           tower *t=new tower(realpos,this);
+
+           Pin *t=new Pin(realpos,2,this);
+           if(canBuyTower(t))
+           {
            towersList.push_back(t);
-            minusgold(TowerCost);}
+            minusgold(t->cost);}
+           else {
+               delete t;
+           }
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
            delete stb1;delete  stb2;delete stb3;delete stbcancel;
@@ -352,11 +461,15 @@ void playscene::mousePressEvent(QMouseEvent *e)
            update();
         });
         connect(stb3,&QPushButton::clicked,[=](){
-            if(canBuyTower())
-            {
-           tower *t=new tower(realpos,this);
+
+           star *t=new star(realpos,3,this);
+           if(canBuyTower(t))
+           {
            towersList.push_back(t);
-            minusgold(TowerCost);}
+            minusgold(t->cost);}
+           else {
+               delete t;
+           }
            //qDebug()<<"jianta";
            //stb1->hide();stb2->hide();stb3->hide();
            delete stb1;delete  stb2;delete stb3;delete stbcancel;
@@ -370,8 +483,53 @@ void playscene::mousePressEvent(QMouseEvent *e)
             update();
         });
         }
+        else {
+            foreach (tower *t, towersList)
+                if(t->position()==realpos)
+                {
+                    if(t->gettag()==1)
+                    {
+//                        t=dynamic_cast<Bottle *>(t);
+                        if(dynamic_cast<Bottle *>(t)->upgrade==false)
+                        {dynamic_cast<Bottle *>(t)->up();
+                        playrGold-=dynamic_cast<Bottle *>(t)->upcost;}
+                    }
+                    if(t->gettag()==2)
+                    {
+//                        t=dynamic_cast<Pin *>(t);
+                        if(dynamic_cast<Pin *>(t)->upgrade==false)
+                        {dynamic_cast<Pin *>(t)->up();
+                        playrGold-=dynamic_cast<Pin *>(t)->upcost;}
+                    }
+                    if(t->gettag()==3)
+                    {
+//                        t=dynamic_cast<Pin *>(t);
+                        if(dynamic_cast<star *>(t)->upgrade==false)
+                        {dynamic_cast<star *>(t)->up();
+                        playrGold-=dynamic_cast<star *>(t)->upcost;}
+                    }
+
+                }
+        }
 
 
+
+    }
+    if(e->button()==Qt::RightButton)
+    {
+//        qDebug()<<"right";
+        foreach (tower *t, towersList)
+        {
+            if(t->position().x()==realpos.x()&&t->position().y()==realpos.y())
+            {
+//                qDebug()<<"delete";
+                Q_ASSERT(t);
+                towersList.removeOne(t);
+                delete t;
+                canputtower[x1][y1]=true;
+                playrGold+=TowerCost*0.8;
+            }
+        }
     }
 }
 void playscene::drawkk(QPainter *painter)
@@ -396,6 +554,7 @@ void playscene::drawkk(QPainter *painter)
 
 void playscene::gameStart()
 {
+    qDebug()<<"start";
     loadWave();
 }
 QList<monster *> playscene::enemyList() const

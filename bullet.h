@@ -17,12 +17,14 @@ class bullet : public QObject
     Q_PROPERTY(QPoint m_currentPos READ currentPos WRITE setcurrentpos)
 public:
     //explicit bullet(QObject *parent = nullptr);
-    bullet(QPoint startp, QPoint targetpoint,int damagee, monster *targett,playscene *gamee);
+    bullet(QPoint startp, QPoint targetpoint,int damagee, int tagg,monster *targett,playscene *gamee);
 
-    void draw(QPainter *painter) const;
-    void move();
+    virtual ~bullet();
+    virtual void draw(QPainter *painter) const;
+    virtual void move();
     void setcurrentpos(QPoint pos);
     QPoint currentPos() const;
+    int tag;
 
 protected:
     const QPoint startpos;
@@ -32,11 +34,11 @@ protected:
     playscene *	game;
     int damage;
     static const QSize fixedSize;
-    QVariantAnimation  *animate;
+//    QVariantAnimation  *animate;
 signals:
 
 public slots:
-    void hitTarget();
+    virtual void hitTarget();
 };
 
 #endif // BULLET_H

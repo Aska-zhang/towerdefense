@@ -461,5 +461,12 @@
         <file>res/TBottle/pic25.png</file>
         <file>res/TBottle/pic26.jpg</file>
         <file>res/TBottle/pic27.png</file>
+        <file>res/TBottle/pic28.png</file>
+        <file>res/TPin/pic24.png</file>
+        <file>res/TPin/pic25.png</file>
+        <file>res/TPin/pic26.png</file>
+        <file>res/TBlueStar/pic66.png</file>
+        <file>res/TPin/pic27.png</file>
+        <file>res/TPin/pic28.png</file>
     </qresource>
 </RCC>

@@ -13,24 +13,28 @@ class tower : public QObject
 {
     Q_OBJECT
 public:
-    explicit tower(QPoint p, playscene *game);
-    ~tower();
+    explicit tower(QPoint p, int tagg,playscene *game);
+    virtual ~tower();
 
-    void draw(QPainter *painter) const;
+    virtual void draw(QPainter *painter) const;
     void attackEnemy();
     void chooseEnemyForAttack(monster *m);
     void targetKilled();
     void lostSightOfEnemy();
-    void checkEnemyInRange();
+    virtual void checkEnemyInRange();
     void damageEnemy();
     void removeBullet();
+    QPoint position()const{return pos;}
+    virtual void upgrade(){};
 
+    int gettag(){return tag;}
 
 protected:
     int attackrange;//攻击范围
     int damage;//伤害
     int HP;
     int firerate;//攻击频率
+    int tag;
     QString picway;
     QPoint pos;
     bool attacking;
@@ -47,7 +51,7 @@ protected:
 signals:
 
 public slots:
-    void shootWeapon();
+    virtual void shootWeapon();
 };
 
 #endif // TOWER_H

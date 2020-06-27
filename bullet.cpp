@@ -9,12 +9,18 @@
 //}
 const QSize bullet::fixedSize(10, 10);
 
-bullet::bullet(QPoint startp, QPoint targetpoint,int damagee, monster *targett,playscene *gamee)
+bullet::bullet(QPoint startp, QPoint targetpoint,int damagee,int tagg, monster *targett,playscene *gamee)
     :startpos(startp),targetpos(targetpoint),currentpos(startp),target(targett),game(gamee),damage(damagee)
-    ,animate(new QVariantAnimation)
+    ,tag(tagg)
 {
 //qDebug()<<targetpos.x()<<" "<<targetpoint.y()<<endl;
 //qDebug()<<targett->position().x();
+}
+
+bullet::~bullet()
+{
+    target=nullptr;
+    game=nullptr;
 }
 
 void bullet::draw(QPainter *painter) const
